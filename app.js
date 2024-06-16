@@ -383,6 +383,7 @@ async function main() {
 
 
 
+
     // #region artistas
 
     app.get('/artista/todos', async (req, res) => {
@@ -452,9 +453,9 @@ async function main() {
         }
     })
 
-    app.get('/album/artista/:artista', async (req, res) => {
+    app.get('/album/artista/:nombre', async (req, res) => {
         try {
-            album = await albumes.find({ artista: req.params.artista });
+            album = await albumes.find({ artista: req.params.nombre });
             if (album.length > 0) {
                 return res.json(album);
             } else {
@@ -502,9 +503,9 @@ async function main() {
         }
     })
 
-    app.get('/cancion/artista/:artista', async (req, res) => {
+    app.get('/cancion/artista/:nombre', async (req, res) => {
         try {
-            cancion = await canciones.find({ artista: req.params.artista });
+            cancion = await canciones.find({ artista: req.params.nombre });
             if (cancion.length > 0) {
                 return res.json(cancion);
             } else {
@@ -515,9 +516,9 @@ async function main() {
         }
     })
 
-    app.get('/cancion/album/:album', async (req, res) => {
+    app.get('/cancion/album/:titulo', async (req, res) => {
         try {
-            cancion = await canciones.find({ album: req.params.album });
+            cancion = await canciones.find({ album: req.params.titulo });
             if (cancion.length > 0) {
                 return res.json(cancion);
             } else {
@@ -728,6 +729,7 @@ async function main() {
 
 
     // #region ELIMINAR
+
 
 
 
