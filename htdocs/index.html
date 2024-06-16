@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <table class="table w-50 m-5">
+        <thead>
+            <tr>
+                <th>Nombre artista:</th>
+                <th id="nombre"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Nombre miembro 1:</th>
+                <th id="miembro1"></th>
+            </tr>
+            <tr>
+                <th>Nombre miembro 2:</th>
+                <th id="miembro2"></th>
+            </tr>
+            <tr>
+                <th>Nombre miembro 3:</th>
+                <th id="miembro3"></th>
+            </tr>
+            <tr>
+                <th>Nombre miembro 4:</th>
+                <th id="miembro4"></th>
+            </tr>
+            <tr>
+                <th>Nombre miembro 5:</th>
+                <th id="miembro5"></th>
+            </tr>
+            <tr>
+                <th>Activo:</th>
+                <th id="activo"></th>
+            </tr>
+        </tbody>
+    </table>
+
+    <form method="POST">
+        <label for="nombre">Buscador de artistas:</label>
+        <input type="text" name="nombre">
+    </form>
+
+    <script>
+
+        function mayuscula(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        fetch('/artista', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nombre: nombre }),
+        })
+            .then(res => res.json())
+            .then(artista => {
+                console.log(artista);
+                document.getElementById('nombre').textContent = mayuscula(artista.nombre);
+                for (let i = 0; i < artista.miembros.length; i++) {
+                    document.getElementById(`miembro${i + 1}`).textContent = mayuscula(artista.miembros[i].nombre);
+                }
+                if (artista.activo) {
+                    document.getElementById('activo').textContent = "Artista en activo";
+                } else {
+                    document.getElementById('activo').textContent = "Artista retirado";
+                }
+
+            })
+            .catch(error => console.error('Error con el JSON:', error));
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+
+</html>
