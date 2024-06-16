@@ -731,9 +731,86 @@ async function main() {
 
 
 
-    // #region por nombre
+    // #region con confirmación
 
     app.get('/artista/del/:nombre', async (req, res) => {
+        try {
+            const artista = await artistas.findOne({ nombre: req.params.nombre });
+            if (artista) {
+                return res.send(`
+                    <html>
+                        <body>
+                            <h2>Confirmar eliminación</h2>
+                            <p>¿Estás seguro de que deseas eliminar al artista ${artista.nombre}?</p>
+                            <form action="/artista/delc/${artista.nombre}" method="POST">
+                                <button type="submit">Sí, eliminar</button>
+                                <a href="/">Cancelar</a>
+                            </form>
+                        </body>
+                    </html>
+                `);
+            } else {
+                return res.send(`Artista ${req.params.nombre} no encontrado.`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            return res.status(500).send("Error al eliminar el artista.");
+        }
+    });
+
+    app.get('/album/del/:titulo', async (req, res) => {
+        try {
+            const album = await albumes.findOne({ titulo: req.params.titulo });
+            if (album) {
+                return res.send(`
+                    <html>
+                        <body>
+                            <h2>Confirmar eliminación</h2>
+                            <p>¿Estás seguro de que deseas eliminar al album ${album.titulo}?</p>
+                            <form action="/album/delc/${album.titulo}" method="POST">
+                                <button type="submit">Sí, eliminar</button>
+                                <a href="/">Cancelar</a>
+                            </form>
+                        </body>
+                    </html>
+                `);
+            } else {
+                return res.send(`Álbum ${req.params.titulo} no encontrado.`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            return res.status(500).send("Error al eliminar el álbum.");
+        }
+    });
+
+    app.get('/cancion/del/:titulo', async (req, res) => {
+        try {
+            const cancion = await canciones.findOne({ titulo: req.params.titulo });
+            if (cancion) {
+                return res.send(`
+                    <html>
+                        <body>
+                            <h2>Confirmar eliminación</h2>
+                            <p>¿Estás seguro de que deseas eliminar al cancion ${cancion.titulo}?</p>
+                            <form action="/cancion/delc/${cancion.titulo}" method="POST">
+                                <button type="submit">Sí, eliminar</button>
+                                <a href="/">Cancelar</a>
+                            </form>
+                        </body>
+                    </html>
+                `);
+            } else {
+                return res.send(`Canción ${req.params.titulo} no encontrada.`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            return res.status(500).send("Error al eliminar la canción.");
+        }
+    });
+
+
+
+    app.get('/artista/delc/:nombre', async (req, res) => {
         const artista = await artistas.findOneAndDelete({ nombre: req.params.nombre });
         if (artista) {
             return res.send(`Artista ${artista.nombre} eliminado con éxito.`);
@@ -742,7 +819,8 @@ async function main() {
         }
     });
 
-    app.get('/album/del/:titulo', async (req, res) => {
+
+    app.get('/album/delc/:titulo', async (req, res) => {
         const album = await albumes.findOneAndDelete({ titulo: req.params.titulo });
         if (album) {
             return res.send(`Álbum ${album.titulo} eliminado con éxito.`);
@@ -751,7 +829,7 @@ async function main() {
         }
     });
 
-    app.get('/cancion/del/:titulo', async (req, res) => {
+    app.get('/cancion/delc/:titulo', async (req, res) => {
         const cancion = await canciones.findOneAndDelete({ titulo: req.params.titulo });
         if (cancion) {
             return res.send(`Canción ${cancion.titulo} eliminada con éxito.`);
@@ -791,8 +869,4 @@ async function main() {
             return res.send('Álbumes no encontrados.');
         }
     });
-
-
-
-
 } 
