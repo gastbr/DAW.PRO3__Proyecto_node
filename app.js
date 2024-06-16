@@ -378,7 +378,7 @@ async function main() {
 
     console.log('\n---FIN INSERCIÓN DE DATOS---\n');
 
-    // #region ENDPOINTS
+    // #region FIND
 
 
 
@@ -593,6 +593,73 @@ async function main() {
             return res.status(500).send("Error al buscar canciones.");
         }
     });
+
+
+    // #region POST
+
+    app.post('/new/cancion', async (req, res) => {
+        try {
+            const titulo = req.body.titulo;
+            const artista = req.body.artista;
+            const album = req.body.album;
+            const duracion_segundos = req.body.duracion_segundos;
+            const fechaPublicacion = req.body.fechaPublicacion;
+
+            res.send(titulo);
+
+  /*           if (!titulo || !artista || !album || !duracion_segundos || !fechaPublicacion) {
+                return res.status(400).json({ error: 'Todos los campos son obligatorios: titulo, artista, album, duracion, fecha.' });
+            } */
+
+            const newCancion = new canciones({
+                titulo: titulo,
+                artista: artista,
+                album: album,
+                duracion_segundos: duracion_segundos,
+                fechaPublicacion: fechaPublicacion
+            });
+
+            await newCancion.save();
+
+            res.status(201).send(`${newCancion.titulo} se ha añadido correctamente`);
+        } catch (error) {
+            res.status(500).json({ error: 'Error al añadir la canción' });
+        }
+    });
+
+
+
+    /*
+    
+        const schArtista = new mongoose.Schema(
+            {
+                nombre: { type: String, unique: true },
+                miembros: [{ nombre: String }],
+                activo: { type: Boolean, default: false },
+                genero: [{ genero: String }]
+            }
+        );
+    
+        const schAlbum = new mongoose.Schema(
+            {
+                titulo: { type: String, unique: true },
+                artista: String,
+                genero: [{ genero: String }]
+            }
+        );
+    
+        const schCancion = new mongoose.Schema(
+            {
+                titulo: { type: String, unique: true },
+                artista: String,
+                album: String,
+                duracion_segundos: Number,
+                fechaPublicacion: Date
+            }
+        );
+    
+    */
+
 
 
 } 
