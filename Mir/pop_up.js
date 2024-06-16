@@ -202,18 +202,7 @@ async function main() {
     res.send(cliente.id + ' se ha actualizado');
   });
 
-
-
-
   //  const tiendita = await Tienda.find();
   //  console.log(tiendita);
-
-
-
-
-
-
-
-
 }
 

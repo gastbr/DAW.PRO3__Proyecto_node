@@ -14,6 +14,7 @@ main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect('mongodb+srv://usermm:majada@majadabae.5qbeln1.mongodb.net/node');
     app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
     app.use(express.static('htdocs'));
 
     // #region ESQUEMAS
@@ -386,7 +387,7 @@ async function main() {
 
     app.get('/artista/todos', async (req, res) => {
         const artista = await artistas.find();
-        if (artista) {
+        if (artista.length > 0) {
             return res.json(artista);
         } else {
             return res.send("No hay registros.");
@@ -405,7 +406,7 @@ async function main() {
     app.get('/artista/genero/:genero', async (req, res) => {
         try {
             artista = await artistas.find({ 'genero.genero': req.params.genero });
-            if (artista) {
+            if (artista.length > 0) {
                 return res.json(artista);
             } else {
                 return res.send(`Género ${req.params.genero} no encontrado.`);
@@ -418,7 +419,7 @@ async function main() {
     app.get('/artista/activo/:activo', async (req, res) => {
         try {
             artista = await artistas.find({ activo: req.params.activo });
-            if (artista) {
+            if (artista.length > 0) {
                 return res.json(artista);
             } else {
                 return res.send("No se encontraron artistas.");
@@ -431,7 +432,7 @@ async function main() {
 
     app.get('/album/todos', async (req, res) => {
         const album = await albumes.find();
-        if (album) {
+        if (album.length > 0) {
             return res.json(album);
         } else {
             return res.send("No hay registros.");
@@ -441,7 +442,7 @@ async function main() {
     app.get('/album/titulo/:titulo', async (req, res) => {
         try {
             album = await albumes.find({ titulo: req.params.titulo });
-            if (album) {
+            if (album.length > 0) {
                 return res.json(album);
             } else {
                 return res.send("No se encontraron álbumes.");
@@ -454,7 +455,7 @@ async function main() {
     app.get('/album/artista/:artista', async (req, res) => {
         try {
             album = await albumes.find({ artista: req.params.artista });
-            if (album) {
+            if (album.length > 0) {
                 return res.json(album);
             } else {
                 return res.send("No se encontraron álbumes.");
@@ -467,7 +468,7 @@ async function main() {
     app.get('/album/genero/:genero', async (req, res) => {
         try {
             album = await albumes.find({ 'genero.genero': req.params.genero });
-            if (album) {
+            if (album.length > 0) {
                 return res.json(album);
             } else {
                 return res.send("No se encontraron álbumes.");
@@ -481,7 +482,7 @@ async function main() {
 
     app.get('/cancion/todas', async (req, res) => {
         const cancion = await canciones.find();
-        if (cancion) {
+        if (cancion.length > 0) {
             return res.json(cancion);
         } else {
             return res.send("No hay registros.");
@@ -491,7 +492,7 @@ async function main() {
     app.get('/cancion/titulo/:titulo', async (req, res) => {
         try {
             cancion = await canciones.find({ titulo: req.params.titulo });
-            if (cancion) {
+            if (cancion.length > 0) {
                 return res.json(cancion);
             } else {
                 return res.send("No se encontraron canciones.");
@@ -504,7 +505,7 @@ async function main() {
     app.get('/cancion/artista/:artista', async (req, res) => {
         try {
             cancion = await canciones.find({ artista: req.params.artista });
-            if (cancion) {
+            if (cancion.length > 0) {
                 return res.json(cancion);
             } else {
                 return res.send("No se encontraron canciones.");
@@ -517,7 +518,7 @@ async function main() {
     app.get('/cancion/album/:album', async (req, res) => {
         try {
             cancion = await canciones.find({ album: req.params.album });
-            if (cancion) {
+            if (cancion.length > 0) {
                 return res.json(cancion);
             } else {
                 return res.send("No se encontraron canciones.");
@@ -595,9 +596,9 @@ async function main() {
     });
 
 
-    // #region POST
+    // #region añadir nuevo
 
-    app.post('/new/cancion', async (req, res) => {
+    app.post('/cancion/new', async (req, res) => {
         try {
             const titulo = req.body.titulo;
             const artista = req.body.artista;
@@ -605,11 +606,9 @@ async function main() {
             const duracion_segundos = req.body.duracion_segundos;
             const fechaPublicacion = req.body.fechaPublicacion;
 
-            res.send(titulo);
-
-  /*           if (!titulo || !artista || !album || !duracion_segundos || !fechaPublicacion) {
+            if (!titulo || !artista || !album || !duracion_segundos || !fechaPublicacion) {
                 return res.status(400).json({ error: 'Todos los campos son obligatorios: titulo, artista, album, duracion, fecha.' });
-            } */
+            }
 
             const newCancion = new canciones({
                 titulo: titulo,
@@ -627,38 +626,172 @@ async function main() {
         }
     });
 
+    app.post('/artista/new', async (req, res) => {
+        try {
+            const nombre = req.body.nombre;
+            const miembros = req.body.miembros;
+            const activo = req.body.activo;
+            const genero = req.body.genero;
+
+            if (!nombre || !miembros || !activo || !genero) {
+                return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+            }
+
+            const newArtista = new artistas({
+                nombre: nombre,
+                miembros: miembros,
+                activo: activo,
+                genero: genero
+            });
+
+            await newArtista.save();
+
+            res.status(201).send(`${newArtista.nombre} se ha añadido correctamente`);
+        } catch (error) {
+            res.status(500).json({ error: 'Error al añadir el artista' });
+        }
+    });
+
+    app.post('/album/new', async (req, res) => {
+        const titulo = req.body.titulo;
+        const artista = req.body.artista;
+        const genero = req.body.genero;
+
+        if (!titulo || !artista || !genero) {
+            return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+        }
+
+        try {
+            const newAlbum = new albumes({
+                titulo: titulo,
+                artista: artista,
+                genero: genero
+            });
+
+            await newAlbum.save();
+
+            res.send(`${newAlbum.titulo} se ha añadido correctamente`);
+        } catch (error) {
+            const existe = await artistas.findOne({ titulo: req.params.titulo });
+            if (existe) {
+                res.send(`El album ${titulo} ya está registrado.`);
+            } else {
+                res.json({ error: 'Error al añadir el álbum.' });
+            }
+        }
+    });
+
+    // #region update
+
+    app.post('/cancion/update/:titulo', async (req, res) => {
+        const filtro = { titulo: req.params.titulo };
+        const valores = {
+            artista: req.body.artista,
+            titulo: req.body.titulo,
+            album: req.body.album,
+            duracion_segundos: req.body.duracion_segundos,
+            fechaPublicacion: req.body.fechaPublicacion
+        };
+
+        const update = await canciones.findOneAndUpdate(filtro, valores, { new: true });
+
+        res.send(`Datos de la canción ${update.titulo} actualizados.`);
+    });
+
+    app.post('/artista/update/:nombre', async (req, res) => {
+        const filtro = { nombre: req.params.nombre };
+        const valores = {
+            nombre: req.body.nombre,
+            genero: req.body.genero,
+            miembros: req.body.miembros,
+            activo: req.body.activo
+        };
+
+        const update = await artistas.findOneAndUpdate(filtro, valores, { new: true });
+
+        res.send(`Datos del artista ${update.nombre} actualizados.`);
+    });
+
+    app.post('/album/update/:titulo', async (req, res) => {
+        const filtro = { titulo: req.params.titulo };
+        const valores = {
+            titulo: req.body.titulo,
+            genero: req.body.genero,
+            artista: req.body.artista
+        };
+
+        const update = await albumes.findOneAndUpdate(filtro, valores, { new: true });
+
+        res.send(`Datos del álbum ${update.titulo} actualizados.`);
+    });
 
 
-    /*
-    
-        const schArtista = new mongoose.Schema(
-            {
-                nombre: { type: String, unique: true },
-                miembros: [{ nombre: String }],
-                activo: { type: Boolean, default: false },
-                genero: [{ genero: String }]
-            }
-        );
-    
-        const schAlbum = new mongoose.Schema(
-            {
-                titulo: { type: String, unique: true },
-                artista: String,
-                genero: [{ genero: String }]
-            }
-        );
-    
-        const schCancion = new mongoose.Schema(
-            {
-                titulo: { type: String, unique: true },
-                artista: String,
-                album: String,
-                duracion_segundos: Number,
-                fechaPublicacion: Date
-            }
-        );
-    
-    */
+
+    // #region ELIMINAR
+
+
+
+    // #region por nombre
+
+    app.get('/artista/del/:nombre', async (req, res) => {
+        const artista = await artistas.findOneAndDelete({ nombre: req.params.nombre });
+        if (artista) {
+            return res.send(`Artista ${artista.nombre} eliminado con éxito.`);
+        } else {
+            return res.send(`Artista ${req.params.nombre} no encontrado.`);
+        }
+    });
+
+    app.get('/album/del/:titulo', async (req, res) => {
+        const album = await albumes.findOneAndDelete({ titulo: req.params.titulo });
+        if (album) {
+            return res.send(`Álbum ${album.titulo} eliminado con éxito.`);
+        } else {
+            return res.send(`Álbum ${req.params.titulo} no encontrado.`);
+        }
+    });
+
+    app.get('/cancion/del/:titulo', async (req, res) => {
+        const cancion = await canciones.findOneAndDelete({ titulo: req.params.titulo });
+        if (cancion) {
+            return res.send(`Canción ${cancion.titulo} eliminada con éxito.`);
+        } else {
+            return res.send(`Canción ${req.params.titulo} no encontrada.`);
+        }
+    });
+
+
+    // #region por filtros
+
+    app.get('/artista/del/activo/:activo', async (req, res) => {
+        let param = req.params.activo;
+        let activo = "";
+        const artista = await artistas.deleteMany({ activo: param });
+
+        console.log(artista);
+        console.log(param);
+
+        if (param === 'false') {
+            activo = " no";
+        }
+
+        if (artista.deletedCount > 0) {
+            return res.send(`${artista.deletedCount} artistas${activo} activos eliminados con éxito.`);
+        } else {
+            return res.send('Artistas no encontrados.');
+        }
+    });
+
+    app.get('/album/del/genero/:genero', async (req, res) => {
+        const album = await albumes.deleteMany({ 'genero.genero': req.params.genero });
+
+        if (album.deletedCount > 0) {
+            return res.send(`${album.deletedCount} álbumes del género ${req.params.genero} activos eliminados con éxito.`);
+        } else {
+            return res.send('Álbumes no encontrados.');
+        }
+    });
+
 
 
 
